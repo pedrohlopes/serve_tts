@@ -2,7 +2,6 @@ from flask import Flask, render_template, request, send_file
 from werkzeug.utils import secure_filename
 import subprocess
 import os
-from endtoend import separate_from_model
 import torch
 import numpy
 import sys
