@@ -60,21 +60,34 @@
 
 
 	<main class="container">
+	
 	<div class="wrapper">
+		<img style="float:left; margin: 0 15px 0 0;" src="images/logo.png" alt="" width="80"/>
+		
 		<article class="post">
 			<header class="post-header">
 				<br>
 				<h1 class="post-title">Self-service Voice Syntesis tool</h1>
-				<p class="lead"> Ferramenta web para geração de voz sintética, a partir das vozes desenvolvidas no MTL. </p>
+				<p class="lead"> Ferramenta web para geração de voz sintética, a partir das vozes desenvolvidas no MTL - HDG. </p>
 			</header>
 		</article>
+		
 	</div>
-	
+	  
 	
 
       <form id="myform" class="form" action = "/" method = "POST" 
          enctype = "multipart/form-data">
 		 <div class="form-group">
+			<label for="model">Escolha uma voz:</label>
+
+			<select name="select_model" id="select_model">
+				<option value="voz_base">Voz Base (20h)</option>
+				<option value="cadu_2h">Cadu (2h)</option>
+				
+			</select>
+			<br>
+			<small id="selectHelp" class="form-text text-muted">Obs.: Trocar o modelo pode demorar alguns segundos.</small>
 			<label for="synth_text">Frase para síntese</label>
 			<input type="text" class="form-control" name="synth_text" id="synth_text" aria-describedby="emailHelp" placeholder="Entre a frase aqui">
 			<small id="emailHelp" class="form-text text-muted">Exemplo: Pode falar qualquer coisa. Só não pode esquecer da pontuação!</small>
@@ -84,36 +97,7 @@
 		<audio src={{audio_filename}} controls onerror="this.style.display = 'none'"></audio>
 	</main>
       <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
-	<script>
-	$(document).ready(function() {
-		    $("body").prepend('<div id="overlay" class="ui-widget-overlay" style="z-index: 1001; display: none;"></div>');
-		    $("body").prepend("<div id='PleaseWait' style='display: none;'><h> Loading...</h></div>");
-	});
-
-	$(function() {
-	  $('.fileinput-upload').click(function() {
-	    console.log(this);
-	    var btn = $(this);
-		var e = document.getElementById('select_model');
-		var model = e.value;
-		if (model === ""){
-
-		}else{
-			$.LoadingOverlay("show", {text:"Separating your song. This may take a while..."});
-			setTimeout(function () {
-				$.LoadingOverlay("text", "Just a little bit more...");
-			}, 25000);
-			$(this).html(
-					`<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Loading... Please Wait`
-			);
-			//setTimeout(function(){
-			//    btn.prop("disabled", true);
-			//   $.LoadingOverlay("Separating your song...");
-			//}, 500);
-		};
-	   });
-	  });
-	</script>
+	
 
    </body>
 </html>
