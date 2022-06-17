@@ -9,8 +9,8 @@ import numpy
 import sys
 import audiofile as af
 import numpy as np
-sys.path.append('/home/ubuntu/voice_code/tacotron-mod/tacotron2/')
-sys.path.append('/home/ubuntu/voice_code/tacotron-mod/tacotron2/waveglow/')
+sys.path.append('/home/pedro_hleite_g_globo/tacotron2-custom-code-main/')
+sys.path.append('/home/pedro_hleite_g_globo/tacotron2-custom-code-main/waveglow/')
 from hparams import create_hparams
 from model import Tacotron2
 from layers import TacotronSTFT, STFT
@@ -52,25 +52,42 @@ hparams.mel_fmax=8000.0
 hparams.global_mean = None
 hparams.max_decoder_steps=2000
 hparams.idx = 0
-tacotron_path_base = "/home/ubuntu/tts_models/tacotron/latest_voz_base_22"
-waveglow_path_base = '/home/ubuntu/voice_code/tacotron-mod/tacotron2/outdir/waveglow_base_22_cond'
-tacotron_path_dirceu = "/home/ubuntu/voice_code/tacotron-mod/tacotron2/outdir/last_dirceu" #checkpoint_from_grid01 era o cadu
-waveglow_path_dirceu = '/home/ubuntu/voice_code/tacotron-mod/tacotron2/outdir/checkpoint_dirceu'
+
+waveglow_paths ={}
+tacotron_paths = {}
+sigmas ={}
+denoiser_alphas = {}
+tacotron_paths['voz_base'] = '/home/pedro_hleite_g_globo/tacotron2-custom-code-main/latest_voz_base_22'
+waveglow_paths['voz_base'] = '/home/pedro_hleite_g_globo/tacotron2-custom-code-main/waveglow_base_22_cond'
+tacotron_paths['dirceu'] = "/home/pedro_hleite_g_globo/best_dirceu_22_tacotron" #checkpoint_from_grid01 era o cadu
+waveglow_paths['dirceu'] = "/home/pedro_hleite_g_globo/best_dirceu_22_waveglow"
+sigmas['voz_base'] = .93
+denoiser_alphas['voz_base'] = 0.01
+sigmas['dirceu'] = 0.8
+denoiser_alphas['dirceu'] = 0.1
+tacotron_paths['dirceu_aberto'] = "/home/pedro_hleite_g_globo/taco_dirceu_aberto" #checkpoint_from_grid01 era o cadu
+waveglow_paths['dirceu_aberto'] = "/home/pedro_hleite_g_globo/best_dirceu_22_waveglow"
+tacotron_paths['dirceu_fechado'] = "/home/pedro_hleite_g_globo/taco_dirceu_fechado"
+waveglow_paths['dirceu_fechado'] = "/home/pedro_hleite_g_globo/best_dirceu_22_waveglow"
+sigmas['dirceu_aberto'] = 0.8
+denoiser_alphas['dirceu_aberto'] = 0.1
+sigmas['dirceu_fechado'] = 0.8
+denoiser_alphas['dirceu_fechado'] = 0.1
+
 def load_synth_model(tacotron_path,waveglow_path):
     model = load_model(hparams)
     model.load_state_dict(torch.load(tacotron_path)['state_dict'])
     _ = model.cuda().eval().half()
     waveglow = torch.load(waveglow_path)['model']
     waveglow.cuda().eval().half()
-    current_model = 'dirceu'
     for k in waveglow.convinv:
         k.float()
     denoiser = Denoiser(waveglow,filter_length=hparams.filter_length, n_overlap=4,
                             win_length=hparams.win_length, mode='zeros',n_mels=hparams.n_mel_channels)
     return model, waveglow, denoiser
     
-model, waveglow, denoiser = load_synth_model(tacotron_path_dirceu,waveglow_path_dirceu)
 current_model = 'dirceu'
+model, waveglow, denoiser = load_synth_model(tacotron_paths[current_model],waveglow_paths[current_model])
 current_sigma = 0.93
 current_denoiser_alpha = 0.01
 
@@ -92,14 +109,9 @@ def upload_file2():
         print(synth_text)
         if selected_model != current_model:
             current_model = selected_model
-            if selected_model == 'voz_base':
-                model, waveglow, denoiser = load_synth_model(tacotron_path_base,waveglow_path_base)
-                current_sigma = .93
-                current_denoiser_alpha = 0.01  
-            elif selected_model=='dirceu':
-                model, waveglow, denoiser = load_synth_model(tacotron_path_dirceu,waveglow_path_dirceu)
-                current_sigma = 0.8
-                current_denoiser_alpha = 0.1 
+            model, waveglow, denoiser = load_synth_model(tacotron_paths[current_model],waveglow_paths[current_model])
+            current_sigma = sigmas[current_model]
+            current_denoiser_alpha = denoiser_alphas[current_model]
         
                 
 
@@ -127,4 +139,4 @@ def returnAudioFile(audio_file_name):
          attachment_filename=audio_file_name)
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0',port=8080)
+    app.run(host='0.0.0.0',port=9191)
